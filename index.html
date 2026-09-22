@@ -2795,9 +2795,9 @@
 
 
       script.src =
-        GAS_API_URL +
-        "?callback=" +
-        encodeURIComponent(callbackName);
+  GAS_API_URL +
+  "?mode=schedule&callback=" +
+  encodeURIComponent(callbackName);
 
 
       script.onerror =
