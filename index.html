@@ -3206,9 +3206,9 @@ function prefetchSchedule() {
 
 
   script.src =
-    GAS_API_URL +
-    "?callback=" +
-    encodeURIComponent(callbackName);
+  GAS_API_URL +
+  "?mode=detail&callback=" +
+  encodeURIComponent(callbackName);
 
 
   script.onerror =
