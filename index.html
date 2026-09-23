@@ -2896,62 +2896,245 @@
     }
 
 
-    function openScheduleDetail(scheduleId) {
+   function openScheduleDetail(scheduleId) {
 
-      const schedule =
-        window.scheduleData.find(function(item) {
+  const schedule =
+    window.scheduleData.find(function(item) {
 
-          return String(item.id) === String(scheduleId);
+      return String(item.id) === String(scheduleId);
 
-        });
+    });
 
 
-      if (!schedule) {
+  if (!schedule) {
 
-        alert(
-          "開催情報を取得できませんでした。"
+    alert(
+      "開催情報を取得できませんでした。"
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * ========================================
+   * 開催詳細画面を表示
+   * ========================================
+   */
+
+  document.querySelector(".app").style.display = "none";
+
+  document.getElementById("schedulePage").classList.remove("active");
+
+  document.getElementById("detailPage").classList.add("active");
+
+
+  document.getElementById("detailHeaderTitle").textContent =
+    schedule.venueText;
+
+
+  document.getElementById("detailHeaderPeriod").textContent =
+    formatJapaneseDate(schedule.startDate, schedule.startWeekday) +
+    "～" +
+    formatJapaneseDate(schedule.endDate, schedule.endWeekday) +
+    " 開催";
+
+
+  /*
+   * ========================================
+   * 読み込み中表示
+   * ========================================
+   */
+
+  const featuredList =
+    document.getElementById("featuredList");
+
+  const predictionList =
+    document.getElementById("predictionList");
+
+
+  if (featuredList) {
+
+    featuredList.innerHTML =
+      '<div class="featured-empty">' +
+      '注目選手を読み込み中です…' +
+      '</div>';
+
+  }
+
+
+  if (predictionList) {
+
+    predictionList.innerHTML =
+      '<div class="prediction-empty">' +
+      '当日予想を読み込み中です…' +
+      '</div>';
+
+  }
+
+
+  /*
+   * ========================================
+   * 開催詳細用データを取得
+   *
+   * スケジュール表示とは別に取得する。
+   * 通常モードなので、
+   * 注目選手・日別予想も取得できる。
+   * ========================================
+   */
+
+  const callbackName =
+    "detailCallback_" + Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        if (
+          !response ||
+          response.success !== true
+        ) {
+
+          throw new Error(
+            response && response.error
+              ? response.error
+              : "データ取得に失敗しました。"
+          );
+
+        }
+
+
+        /*
+         * 注目選手
+         */
+
+        window.featuredRidersData =
+          response.featuredRiders || [];
+
+
+        /*
+         * 日別予想
+         */
+
+        window.dailyPredictionsData =
+          response.dailyPredictions ||
+          response.predictions ||
+          [];
+
+
+        /*
+         * データ取得後に表示
+         */
+
+        renderFeaturedRiders(schedule.id);
+
+        renderDailyPredictions(schedule);
+
+
+      } catch (error) {
+
+        console.error(
+          "openScheduleDetail error:",
+          error
         );
 
-        return;
+
+        if (featuredList) {
+
+          featuredList.innerHTML =
+            '<div class="featured-empty">' +
+            '注目選手の情報を取得できませんでした。' +
+            '</div>';
+
+        }
+
+
+        if (predictionList) {
+
+          predictionList.innerHTML =
+            '<div class="prediction-empty">' +
+            '当日予想の情報を取得できませんでした。' +
+            '</div>';
+
+        }
+
+      } finally {
+
+        delete window[callbackName];
+
+        if (
+          script &&
+          script.parentNode
+        ) {
+
+          script.parentNode.removeChild(script);
+
+        }
+
+      }
+
+    };
+
+
+  /*
+   * ========================================
+   * GASへ通常モードでアクセス
+   * ========================================
+   */
+
+  const script =
+    document.createElement("script");
+
+
+  script.src =
+    GAS_API_URL +
+    "?callback=" +
+    encodeURIComponent(callbackName);
+
+
+  script.onerror =
+    function() {
+
+      if (featuredList) {
+
+        featuredList.innerHTML =
+          '<div class="featured-empty">' +
+          '注目選手の情報を取得できませんでした。' +
+          '</div>';
 
       }
 
 
-      /*
-       * ここは元々正常に動いていた処理を維持します。
-       * トップ画面を含む .app を隠して、
-       * 開催詳細画面を表示します。
-       */
+      if (predictionList) {
 
-      document.querySelector(".app").style.display = "none";
+        predictionList.innerHTML =
+          '<div class="prediction-empty">' +
+          '当日予想の情報を取得できませんでした。' +
+          '</div>';
 
-      document.getElementById("schedulePage").classList.remove("active");
-
-      document.getElementById("detailPage").classList.add("active");
+      }
 
 
-      document.getElementById("detailHeaderTitle").textContent =
-        schedule.venueText;
+      delete window[callbackName];
+
+      if (script.parentNode) {
+
+        script.parentNode.removeChild(script);
+
+      }
+
+    };
 
 
-      document.getElementById("detailHeaderPeriod").textContent =
-        formatJapaneseDate(schedule.startDate, schedule.startWeekday) +
-        "～" +
-        formatJapaneseDate(schedule.endDate, schedule.endWeekday) +
-        " 開催";
+  document.body.appendChild(script);
 
 
-      renderFeaturedRiders(schedule.id);
+  window.scrollTo(0, 0);
 
-      /*
-       * 当日予想一覧を表示
-       */
-      renderDailyPredictions(schedule);
-
-      window.scrollTo(0, 0);
-
-    }
-
+}
 
     /*
      * 開催詳細 → トップ
