@@ -2644,6 +2644,111 @@
 
 
     window.scheduleData = [];
+
+// ========================================
+// 予想スケジュール先読み
+// ========================================
+
+window.schedulePrefetchData = null;
+window.schedulePrefetchLoading = false;
+window.schedulePrefetchCallback = null;
+
+
+function prefetchSchedule() {
+
+  // すでに取得済みなら何もしない
+  if (window.schedulePrefetchData) {
+    return;
+  }
+
+  // 取得中なら重複取得しない
+  if (window.schedulePrefetchLoading) {
+    return;
+  }
+
+  window.schedulePrefetchLoading = true;
+
+
+  const callbackName =
+    "schedulePrefetchCallback_" + Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        if (
+          !response ||
+          response.success !== true
+        ) {
+          return;
+        }
+
+
+        // スケジュールだけ保存
+        window.schedulePrefetchData =
+          response.schedules || [];
+
+
+      } catch (error) {
+
+        console.error(
+          "schedule prefetch error:",
+          error
+        );
+
+      } finally {
+
+        window.schedulePrefetchLoading = false;
+
+        delete window[callbackName];
+
+        if (
+          script &&
+          script.parentNode
+        ) {
+          script.parentNode.removeChild(script);
+        }
+
+      }
+
+    };
+
+
+  const script =
+    document.createElement("script");
+
+
+  script.src =
+    GAS_API_URL +
+    "?mode=schedule&callback=" +
+    encodeURIComponent(callbackName);
+
+
+  script.onerror =
+    function() {
+
+      window.schedulePrefetchLoading = false;
+
+      delete window[callbackName];
+
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+
+    };
+
+
+  document.body.appendChild(script);
+
+}
+
+
+
+
+
+    
     window.dailyPredictionsData = [];
 
 
@@ -2654,7 +2759,17 @@
 
       window.scrollTo(0, 0);
 
-      loadSchedule();
+      if (window.schedulePrefetchData) {
+
+  renderSchedule(
+    window.schedulePrefetchData
+  );
+
+} else {
+
+  loadSchedule();
+
+}
 
     }
 
@@ -2829,6 +2944,7 @@
 
     }
 
+   prefetchSchedule();
 
     function renderSchedule(schedules) {
 
