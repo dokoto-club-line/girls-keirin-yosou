@@ -2764,24 +2764,44 @@ function prefetchSchedule() {
 
     function openSchedule() {
 
-      document.getElementById("topPage").style.display = "none";
-      document.getElementById("schedulePage").classList.add("active");
+  document.getElementById("topPage").style.display = "none";
+  document.getElementById("schedulePage").classList.add("active");
 
-      window.scrollTo(0, 0);
+  window.scrollTo(0, 0);
+
+  if (window.schedulePrefetchData) {
+
+    renderSchedule(
+      window.schedulePrefetchData
+    );
+
+    return;
+  }
+
+  // 先読み中なら、別リクエストを送らずに完了を待つ
+  if (window.schedulePrefetchLoading) {
+
+    const waitTimer = setInterval(function() {
 
       if (window.schedulePrefetchData) {
 
-  renderSchedule(
-    window.schedulePrefetchData
-  );
+        clearInterval(waitTimer);
 
-} else {
+        renderSchedule(
+          window.schedulePrefetchData
+        );
 
+      }
+
+    }, 100);
+
+    return;
+  }
+
+  // 先読みが開始されていない場合だけ通常取得
   loadSchedule();
 
 }
-
-    }
 
 
     function formatJapaneseDate(dateText, weekday) {
