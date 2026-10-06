@@ -3716,13 +3716,14 @@ const dateText =
                 ? (
 
                   '<a' +
-                    ' class="today-start-list-link"' +
-                    ' href="' +
-                      escapeHtml(url) +
-                    '"' +
-                    ' target="_blank"' +
-                    ' rel="noopener noreferrer"' +
-                  '>' +
+  ' class="today-start-list-link"' +
+  ' href="' +
+  escapeHtml(url) +
+  '"' +
+  ' onclick="gtag(\'event\', \'today_start_list_click\')"' +
+  ' target="_blank"' +
+  ' rel="noopener noreferrer"' +
+  '>' +
 
                     '<span class="today-external-icon">↗</span>' +
 
