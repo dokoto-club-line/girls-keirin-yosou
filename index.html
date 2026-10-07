@@ -2177,9 +2177,9 @@
       <!-- 予想スケジュール -->
 
       <button
-        class="menu-item"
-        onclick="openSchedule()"
-      >
+  class="menu-item"
+  onclick="gtag('event', 'schedule_click'); openSchedule()"
+>
 
         <div class="menu-icon calendar-icon">
 
@@ -2215,9 +2215,9 @@
       <!-- 現在開催中の情報 -->
 
       <button
-        class="menu-item"
-        onclick="openCurrent()"
-      >
+  class="menu-item"
+  onclick="gtag('event', 'current_click'); openCurrent()"
+>
 
         <div class="menu-icon calendar-icon">
 
@@ -2285,10 +2285,10 @@
 
       <!-- 予想実績 -->
 
-      <button
-        class="menu-item"
-        onclick="openResults()"
-      >
+     <button
+  class="menu-item"
+  onclick="gtag('event', 'results_click'); openResults()"
+>
 
         <div class="menu-icon chart-icon">
 
