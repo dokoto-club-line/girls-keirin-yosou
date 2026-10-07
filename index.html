@@ -3741,7 +3741,7 @@ const dateText =
   ' href="' +
   escapeHtml(url) +
   '"' +
-  ' onclick="gtag(\'event\', \'today_start_list_click\')"' +
+  '' +
   ' target="_blank"' +
   ' rel="noopener noreferrer"' +
   '>' +
@@ -3848,6 +3848,19 @@ openPredictionDetail(
       );
 
     });
+
+    document.addEventListener("click", function(event) {
+
+  const link =
+    event.target.closest(".today-start-list-link");
+
+  if (!link) {
+    return;
+  }
+
+  gtag('event', 'today_start_list_click');
+
+});
 
     function renderPredictionDetail(schedule, targetDate, selectedRaceNumber) {
 
