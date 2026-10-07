@@ -3840,7 +3840,9 @@ const dateText =
       event.preventDefault();
 event.stopPropagation();
 
-gtag('event', 'prediction_view_click');
+gtag('event', 'prediction_view_click', {
+  source: window.predictionEntrySource || 'unknown'
+});
 
 openPredictionDetail(
         button.getAttribute("data-schedule-id"),
