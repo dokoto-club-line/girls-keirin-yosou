@@ -4568,27 +4568,62 @@ function openToday() {
 
    function openResults() {
 
-  let script = null;
+  try {
 
-  const callbackName =
-    "resultsCallback_" + Date.now();
+    /*
+     * GASから実績データを取得
+     * JSONP / echo は使用しない
+     */
+    fetch(GAS_API_URL, {
+      method: "GET",
+      cache: "no-store"
+    })
 
-  window[callbackName] =
-    function(response) {
+      .then(function(response) {
 
-      try {
+        if (!response.ok) {
+          throw new Error(
+            "HTTP error: " + response.status
+          );
+        }
+
+        return response.text();
+
+      })
+
+      .then(function(text) {
+
+        let response;
+
+        try {
+
+          response = JSON.parse(text);
+
+        } catch (error) {
+
+          console.error(
+            "GAS response:",
+            text
+          );
+
+          throw new Error(
+            "GASから正しいデータを取得できませんでした。"
+          );
+
+        }
 
         if (
           !response ||
           response.success !== true
         ) {
+
           throw new Error(
             response && response.error
               ? response.error
               : "データ取得に失敗しました。"
           );
-        }
 
+        }
 
         /*
          * GASから実績データを受け取る
@@ -4606,30 +4641,29 @@ function openToday() {
          */
 
         document
-  .getElementById("topPage")
-  .style.display = "none";
+          .getElementById("topPage")
+          .style.display = "none";
 
 
-document
-  .getElementById("todayPage")
-  .classList.remove("active");
-
-document
-  .getElementById("schedulePage")
-  .classList.remove("active");
-
-document
-  .getElementById("detailPage")
-  .classList.remove("active");
-
-document
-  .getElementById("predictionDetailPage")
-  .classList.remove("active");
+        document
+          .getElementById("todayPage")
+          .classList.remove("active");
 
 
-document
-  .querySelector(".app")
-  .style.display = "block";
+        document
+          .getElementById("schedulePage")
+          .classList.remove("active");
+
+
+        document
+          .getElementById("detailPage")
+          .classList.remove("active");
+
+
+        document
+          .getElementById("predictionDetailPage")
+          .classList.remove("active");
+
 
         document
           .querySelector(".app")
@@ -4670,14 +4704,17 @@ document
          * 実績を表示
          */
 
-       renderResults();
+        renderResults();
 
-resultsPage.scrollIntoView({
-  behavior: "auto",
-  block: "start"
-});
 
-      } catch (error) {
+        resultsPage.scrollIntoView({
+          behavior: "auto",
+          block: "start"
+        });
+
+      })
+
+      .catch(function(error) {
 
         console.error(
           "openResults error:",
@@ -4688,51 +4725,20 @@ resultsPage.scrollIntoView({
           "予想実績を取得できませんでした。"
         );
 
-      } finally {
+      });
 
-        delete window[callbackName];
+  } catch (error) {
 
-        if (
-          script &&
-          script.parentNode
-        ) {
-          script.parentNode.removeChild(script);
-        }
+    console.error(
+      "openResults error:",
+      error
+    );
 
-      }
+    alert(
+      "予想実績を取得できませんでした。"
+    );
 
-    };
-
-
-  script =
-  document.createElement("script");
-
-
-  script.src =
-    GAS_API_URL +
-    "?callback=" +
-    encodeURIComponent(callbackName);
-
-
-  script.onerror =
-    function() {
-
-      alert(
-        "予想実績を取得できませんでした。"
-      );
-
-      delete window[callbackName];
-
-      if (
-        script.parentNode
-      ) {
-        script.parentNode.removeChild(script);
-      }
-
-    };
-
-
-  document.body.appendChild(script);
+  }
 
 }
 
