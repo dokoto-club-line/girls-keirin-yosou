@@ -4323,156 +4323,142 @@ openPredictionDetail(
 
 function openCurrent() {
 
-  const today = getTodayInJapan();
-
-  const callbackName =
-    "currentCallback_" + Date.now();
+  const today =
+    getTodayInJapan();
 
 
-  window[callbackName] =
-    function(response) {
+  function showCurrentSchedule() {
 
-      try {
+    try {
 
-        if (
-          !response ||
-          response.success !== true
-        ) {
-          throw new Error(
-            response && response.error
-              ? response.error
-              : "データ取得に失敗しました。"
-          );
-        }
+      const currentSchedule =
+        (window.scheduleData || []).find(
+          function(schedule) {
 
+            return (
+              today >= schedule.startDate &&
+              today <= schedule.endDate
+            );
 
-        window.scheduleData =
-          response.schedules || [];
-
-        window.featuredRidersData =
-          response.featuredRiders || [];
-
-        window.dailyPredictionsData =
-          response.dailyPredictions ||
-          response.predictions ||
-          [];
-
-
-        const currentSchedule =
-          window.scheduleData.find(
-            function(schedule) {
-
-              return (
-                today >= schedule.startDate &&
-                today <= schedule.endDate
-              );
-
-            }
-          );
-
-
-        if (!currentSchedule) {
-
-          alert(
-            "現在開催中の開催はありません。"
-          );
-
-          return;
-        }
-
-
-        document.querySelector(".app").style.display = "none";
-
-        document.getElementById("schedulePage")
-          .classList.remove("active");
-
-        document.getElementById("detailPage")
-          .classList.add("active");
-
-
-        document.getElementById("detailHeaderTitle")
-          .textContent =
-          currentSchedule.venueText;
-
-
-        document.getElementById("detailHeaderPeriod")
-          .textContent =
-          formatJapaneseDate(
-            currentSchedule.startDate,
-            currentSchedule.startWeekday
-          ) +
-          "～" +
-          formatJapaneseDate(
-            currentSchedule.endDate,
-            currentSchedule.endWeekday
-          ) +
-          " 開催";
-
-
-        renderFeaturedRiders(
-          currentSchedule.id
+          }
         );
 
 
-        renderDailyPredictions(
-          currentSchedule
-        );
-
-
-        window.scrollTo(0, 0);
-
-
-      } catch (error) {
-
-        console.error(
-          "openCurrent error:",
-          error
-        );
+      if (!currentSchedule) {
 
         alert(
-          "現在開催中の情報を取得できませんでした。"
+          "現在開催中の開催はありません。"
         );
 
-      } finally {
-
-        delete window[callbackName];
-
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-
+        return;
       }
 
-    };
+
+      document
+        .querySelector(".app")
+        .style.display = "none";
 
 
-  const script =
-    document.createElement("script");
+      document
+        .getElementById("schedulePage")
+        .classList
+        .remove("active");
 
 
-  script.src =
-    GAS_API_URL +
-    "?callback=" +
-    encodeURIComponent(callbackName);
+      document
+        .getElementById("detailPage")
+        .classList
+        .add("active");
 
 
-  script.onerror =
-    function() {
+      document
+        .getElementById("detailHeaderTitle")
+        .textContent =
+        currentSchedule.venueText;
+
+
+      document
+        .getElementById("detailHeaderPeriod")
+        .textContent =
+        formatJapaneseDate(
+          currentSchedule.startDate,
+          currentSchedule.startWeekday
+        ) +
+        "～" +
+        formatJapaneseDate(
+          currentSchedule.endDate,
+          currentSchedule.endWeekday
+        ) +
+        " 開催";
+
+
+      renderFeaturedRiders(
+        currentSchedule.id
+      );
+
+
+      renderDailyPredictions(
+        currentSchedule
+      );
+
+
+      window.scrollTo(0, 0);
+
+
+      console.log(
+        "★ 現在開催中の情報表示完了"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "openCurrent error:",
+        error
+      );
 
       alert(
         "現在開催中の情報を取得できませんでした。"
       );
 
-      delete window[callbackName];
+    }
 
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
+  }
+
+
+  // すでにデータ取得済みなら
+  // そのまま表示
+  if (window.appDataReady === true) {
+
+    showCurrentSchedule();
+
+    return;
+
+  }
+
+
+  // まだ取得できていない場合
+  // GAS_APP_DATAを待つ
+
+  const handleAppDataReady =
+    function() {
+
+      showCurrentSchedule();
 
     };
 
 
-  document.body.appendChild(script);
+  window.addEventListener(
+    "appDataReady",
+    handleAppDataReady,
+    {
+      once: true
+    }
+  );
+
+
+  // データ取得開始
+  loadAppData();
 
 }
 
