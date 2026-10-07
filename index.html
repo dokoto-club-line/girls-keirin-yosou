@@ -4605,7 +4605,7 @@ function openToday() {
      * GASから実績データを取得
      * JSONP / echo は使用しない
      */
-    fetch(GAS_API_URL, {
+    fetch(GAS_API_URL + '?mode=results', {
       method: "GET",
       cache: "no-store"
     })
