@@ -3852,6 +3852,20 @@ openPredictionDetail(
 
     });
 
+document.addEventListener("click", function(event) {
+
+  const link = event.target.closest(".start-list-link");
+
+  if (!link) {
+    return;
+  }
+
+  gtag('event', 'start_list_click', {
+    source: window.predictionEntrySource || 'unknown'
+  });
+
+});
+    
     document.addEventListener("click", function(event) {
 
   const link =
