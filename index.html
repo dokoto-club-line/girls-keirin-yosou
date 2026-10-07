@@ -4283,8 +4283,9 @@ openPredictionDetail(
     }
 
 function openCurrent() {
+  window.predictionEntrySource = 'current';
 
-  const today =
+  const today = getTodayInJapan();
     getTodayInJapan();
 
 
