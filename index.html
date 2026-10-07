@@ -2757,7 +2757,79 @@ function prefetchSchedule() {
     window.dailyPredictionsData = [];
 
 
-    function openSchedule() {
+// ========================================
+// HtmlService 共通データ受信
+// ========================================
+
+window.addEventListener("message", function(event) {
+
+  if (
+    !event.data ||
+    event.data.type !== "GAS_APP_DATA"
+  ) {
+    return;
+  }
+
+  const data =
+    event.data.data;
+
+  if (
+    !data ||
+    data.success !== true
+  ) {
+    console.error(
+      "★ GAS_APP_DATA エラー:",
+      data
+    );
+    return;
+  }
+
+  window.scheduleData =
+    data.schedules || [];
+
+  window.featuredRidersData =
+    data.featuredRiders || [];
+
+  window.dailyPredictionsData =
+    data.dailyPredictions || [];
+
+  console.log(
+    "★ GAS_APP_DATA 受信成功"
+  );
+
+  console.log(
+    "★ スケジュール:",
+    window.scheduleData
+  );
+
+  console.log(
+    "★ 注目選手:",
+    window.featuredRidersData
+  );
+
+  console.log(
+    "★ 日別予想:",
+    window.dailyPredictionsData
+  );
+
+});
+
+function loadAppData() {
+
+  const appDataFrame =
+    document.createElement("iframe");
+
+  appDataFrame.src =
+    "https://script.google.com/macros/s/AKfycbzZgmnWgmHdmk6e_agPRdZOGfTZ4uRzyrAnvehbNzAl9lF_iqYSjXFbYy3P7FrGOKk/exec";
+
+  appDataFrame.style.display = "none";
+
+  document.body.appendChild(appDataFrame);
+
+}
+
+    
+function openSchedule() {
 
   document.getElementById("topPage").style.display = "none";
   document.getElementById("schedulePage").classList.add("active");
