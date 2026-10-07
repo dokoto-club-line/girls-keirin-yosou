@@ -4597,75 +4597,104 @@ function openToday() {
 
 }
 
-   function openResults() {
+// 予想実績データをバックグラウンドで先読み
+let resultsPrefetchPromise = null;
+
+function prefetchResults() {
+
+  if (resultsPrefetchPromise) {
+    return resultsPrefetchPromise;
+  }
+
+  resultsPrefetchPromise = fetch(
+    GAS_API_URL + '?mode=results',
+    {
+      method: "GET",
+      cache: "no-store"
+    }
+  )
+    .then(function(response) {
+
+      if (!response.ok) {
+        throw new Error(
+          "HTTP error: " + response.status
+        );
+      }
+
+      return response.json();
+
+    })
+    .then(function(response) {
+
+      if (
+        !response ||
+        response.success !== true
+      ) {
+        throw new Error(
+          "予想実績データの取得に失敗しました。"
+        );
+      }
+
+      window.resultsData =
+        response.results || [];
+
+      window.hitRacesData =
+        response.hitRaces || [];
+
+      window.resultsPrefetched = true;
+
+      console.log(
+        "★ 予想実績データ先読み完了"
+      );
+
+      return response;
+
+    })
+    .catch(function(error) {
+
+      console.error(
+        "予想実績先読みエラー:",
+        error
+      );
+
+      resultsPrefetchPromise = null;
+
+      throw error;
+
+    });
+
+  return resultsPrefetchPromise;
+}
+
+// ページ表示後、少し待ってから先読み開始
+window.addEventListener(
+  "load",
+  function() {
+
+    setTimeout(
+      function() {
+        prefetchResults();
+      },
+      1000
+    );
+
+  }
+);
+
+    
+ function openResults() {
 
   try {
 
     /*
-     * GASから実績データを取得
-     * JSONP / echo は使用しない
+     * 予想実績データ
+     *
+     * すでに先読み済みなら即表示。
+     * 先読み中なら完了を待つ。
      */
-    fetch(GAS_API_URL + '?mode=results', {
-      method: "GET",
-      cache: "no-store"
-    })
+    prefetchResults()
 
       .then(function(response) {
-
-        if (!response.ok) {
-          throw new Error(
-            "HTTP error: " + response.status
-          );
-        }
-
-        return response.text();
-
-      })
-
-      .then(function(text) {
-
-        let response;
-
-        try {
-
-          response = JSON.parse(text);
-
-        } catch (error) {
-
-          console.error(
-            "GAS response:",
-            text
-          );
-
-          throw new Error(
-            "GASから正しいデータを取得できませんでした。"
-          );
-
-        }
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          throw new Error(
-            response && response.error
-              ? response.error
-              : "データ取得に失敗しました。"
-          );
-
-        }
-
-        /*
-         * GASから実績データを受け取る
-         */
-
-        window.resultsData =
-          response.results || [];
-
-        window.hitRacesData =
-          response.hitRaces || [];
-
 
         /*
          * トップ画面を隠す
@@ -4675,31 +4704,25 @@ function openToday() {
           .getElementById("topPage")
           .style.display = "none";
 
-
         document
           .getElementById("todayPage")
           .classList.remove("active");
-
 
         document
           .getElementById("schedulePage")
           .classList.remove("active");
 
-
         document
           .getElementById("detailPage")
           .classList.remove("active");
-
 
         document
           .getElementById("predictionDetailPage")
           .classList.remove("active");
 
-
         document
           .querySelector(".app")
           .style.display = "block";
-
 
         /*
          * 予想実績画面を表示
@@ -4707,7 +4730,6 @@ function openToday() {
 
         const resultsPage =
           document.getElementById("resultsPage");
-
 
         if (!resultsPage) {
 
@@ -4719,9 +4741,7 @@ function openToday() {
 
         }
 
-
         resultsPage.classList.add("active");
-
 
         /*
          * 初期表示は2026年8月
@@ -4730,13 +4750,11 @@ function openToday() {
         window.resultsCurrentMonth =
           "2026-08";
 
-
         /*
          * 実績を表示
          */
 
         renderResults();
-
 
         resultsPage.scrollIntoView({
           behavior: "auto",
@@ -4772,6 +4790,7 @@ function openToday() {
   }
 
 }
+    
 
     function renderResults() {
 
