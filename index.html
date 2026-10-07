@@ -2679,78 +2679,71 @@ function prefetchSchedule() {
   window.schedulePrefetchLoading = true;
 
 
-  const callbackName =
-    "schedulePrefetchCallback_" + Date.now();
+  function useAppData() {
+
+    try {
+
+      window.schedulePrefetchData =
+        window.scheduleData || [];
 
 
-  window[callbackName] =
-    function(response) {
+      console.log(
+        "★ スケジュール先読み完了"
+      );
 
-      try {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-          return;
-        }
+      console.log(
+        "★ スケジュール:",
+        window.schedulePrefetchData
+      );
 
 
-        // スケジュールだけ保存
-        window.schedulePrefetchData =
-          response.schedules || [];
+    } catch (error) {
 
+      console.error(
+        "schedule prefetch error:",
+        error
+      );
 
-      } catch (error) {
-
-        console.error(
-          "schedule prefetch error:",
-          error
-        );
-
-      } finally {
-
-        window.schedulePrefetchLoading = false;
-
-        delete window[callbackName];
-
-        if (
-          script &&
-          script.parentNode
-        ) {
-          script.parentNode.removeChild(script);
-        }
-
-      }
-
-    };
-
-
-  const script =
-    document.createElement("script");
-
-
-  script.src =
-    GAS_API_URL +
-    "?mode=schedule&callback=" +
-    encodeURIComponent(callbackName);
-
-
-  script.onerror =
-    function() {
+    } finally {
 
       window.schedulePrefetchLoading = false;
 
-      delete window[callbackName];
+    }
 
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
+  }
+
+
+  // すでに共通データを取得済みなら
+  // そのまま利用
+  if (window.appDataReady === true) {
+
+    useAppData();
+
+    return;
+
+  }
+
+
+  // 共通データ取得完了を待つ
+  const handleAppDataReady =
+    function() {
+
+      useAppData();
 
     };
 
 
-  document.body.appendChild(script);
+  window.addEventListener(
+    "appDataReady",
+    handleAppDataReady,
+    {
+      once: true
+    }
+  );
+
+
+  // 共通データ取得開始
+  loadAppData();
 
 }
     
