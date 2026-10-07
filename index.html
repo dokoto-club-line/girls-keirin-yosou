@@ -3076,12 +3076,12 @@ function openSchedule() {
 
 
           return (
-            '<button class="schedule-card" type="button" ' +
-              'onclick="openScheduleDetail(\'' +
-                escapeJs(item.id) +
-              '\')">' +
+  '<button class="schedule-card" type="button" ' +
+    'onclick="gtag(\'event\', \'schedule_detail_click\'); openScheduleDetail(\'' +
+      escapeJs(item.id) +
+    '\')">' +
 
-              '<div class="schedule-date">' +
+    '<div class="schedule-date">' +
                 '<div class="schedule-date-main">' +
                   dateText +
                 '</div>' +
