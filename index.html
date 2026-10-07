@@ -2811,6 +2811,8 @@ window.addEventListener("message", function(event) {
     "★ 日別予想:",
     window.dailyPredictionsData
   );
+window.appDataReady = true;
+window.dispatchEvent(new Event("appDataReady"));
 
 });
 
@@ -4477,43 +4479,17 @@ function openCurrent() {
 
 function openToday() {
 
-  const today = getTodayInJapan();
-
-  const callbackName =
-    "todayCallback_" + Date.now();
+  const today =
+    getTodayInJapan();
 
 
-  window[callbackName] =
-    function(response) {
+  function showTodayPredictions() {
 
-      try {
+    try {
 
-        if (
-          !response ||
-          response.success !== true
-        ) {
-          throw new Error(
-            response && response.error
-              ? response.error
-              : "データ取得に失敗しました。"
-          );
-        }
-
-
-        window.scheduleData =
-          response.schedules || [];
-
-        window.featuredRidersData =
-          response.featuredRiders || [];
-
-        window.dailyPredictionsData =
-          response.dailyPredictions ||
-          response.predictions ||
-          [];
-
-
-        const todayPredictions =
-          window.dailyPredictionsData.filter(
+      const todayPredictions =
+        (window.dailyPredictionsData || [])
+          .filter(
             function(item) {
 
               const predictionDate =
@@ -4530,93 +4506,111 @@ function openToday() {
           );
 
 
-        document.querySelector(".app").style.display = "none";
-
-        document.getElementById("schedulePage")
-          .classList.remove("active");
-
-        document.getElementById("detailPage")
-          .classList.remove("active");
-
-        document.getElementById("predictionDetailPage")
-          .classList.remove("active");
+      document
+        .querySelector(".app")
+        .style.display = "none";
 
 
-        const todayPage =
-          document.getElementById("todayPage");
+      document
+        .getElementById("schedulePage")
+        .classList
+        .remove("active");
 
 
-        if (!todayPage) {
-          throw new Error(
-            "本日の予想画面が見つかりません。"
-          );
-        }
+      document
+        .getElementById("detailPage")
+        .classList
+        .remove("active");
 
 
-        todayPage.classList.add("active");
+      document
+        .getElementById("predictionDetailPage")
+        .classList
+        .remove("active");
 
 
-        renderTodayPredictions(
-          todayPredictions
+      const todayPage =
+        document.getElementById("todayPage");
+
+
+      if (!todayPage) {
+
+        throw new Error(
+          "本日の予想画面が見つかりません。"
         );
-
-
-        window.scrollTo(0, 0);
-
-
-      } catch (error) {
-
-        console.error(
-          "openToday error:",
-          error
-        );
-
-        alert(
-          "本日の予想を取得できませんでした。"
-        );
-
-      } finally {
-
-        delete window[callbackName];
-
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
 
       }
 
-    };
+
+      todayPage
+        .classList
+        .add("active");
 
 
-  const script =
-    document.createElement("script");
+      renderTodayPredictions(
+        todayPredictions
+      );
 
 
-  script.src =
-    GAS_API_URL +
-    "?callback=" +
-    encodeURIComponent(callbackName);
+      window.scrollTo(0, 0);
 
 
-  script.onerror =
-    function() {
+      console.log(
+        "★ 本日の予想表示完了"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "openToday error:",
+        error
+      );
 
       alert(
         "本日の予想を取得できませんでした。"
       );
 
-      delete window[callbackName];
+    }
 
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
+  }
+
+
+  // すでにデータ取得済みなら
+  // そのまま表示
+  if (window.appDataReady === true) {
+
+    showTodayPredictions();
+
+    return;
+
+  }
+
+
+  // まだ取得できていない場合
+  // GAS_APP_DATAを待つ
+
+  const handleAppDataReady =
+    function() {
+
+      showTodayPredictions();
 
     };
 
 
-  document.body.appendChild(script);
+  window.addEventListener(
+    "appDataReady",
+    handleAppDataReady,
+    {
+      once: true
+    }
+  );
 
-}    
+
+  // データ取得開始
+  loadAppData();
+
+}
 
     function backToTopFromToday() {
 
