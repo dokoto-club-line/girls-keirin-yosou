@@ -3104,7 +3104,7 @@ function openSchedule() {
     }
 
 
-   function openScheduleDetail(scheduleId) {
+  function openScheduleDetail(scheduleId) {
 
   const schedule =
     window.scheduleData.find(function(item) {
@@ -3143,9 +3143,15 @@ function openSchedule() {
 
 
   document.getElementById("detailHeaderPeriod").textContent =
-    formatJapaneseDate(schedule.startDate, schedule.startWeekday) +
+    formatJapaneseDate(
+      schedule.startDate,
+      schedule.startWeekday
+    ) +
     "～" +
-    formatJapaneseDate(schedule.endDate, schedule.endWeekday) +
+    formatJapaneseDate(
+      schedule.endDate,
+      schedule.endWeekday
+    ) +
     " 開催";
 
 
@@ -3184,127 +3190,37 @@ function openSchedule() {
 
   /*
    * ========================================
-   * 開催詳細用データを取得
-   *
-   * スケジュール表示とは別に取得する。
-   * 通常モードなので、
-   * 注目選手・日別予想も取得できる。
+   * 共通データ取得済みなら
+   * そのまま表示
    * ========================================
    */
 
-  const callbackName =
-    "detailCallback_" + Date.now();
+  function showScheduleDetail() {
+
+    try {
+
+      renderFeaturedRiders(
+        schedule.id
+      );
 
 
-  window[callbackName] =
-    function(response) {
-
-      try {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          throw new Error(
-            response && response.error
-              ? response.error
-              : "データ取得に失敗しました。"
-          );
-
-        }
+      renderDailyPredictions(
+        schedule
+      );
 
 
-        /*
-         * 注目選手
-         */
-
-        window.featuredRidersData =
-          response.featuredRiders || [];
+      console.log(
+        "★ 開催詳細表示完了"
+      );
 
 
-        /*
-         * 日別予想
-         */
+    } catch (error) {
 
-        window.dailyPredictionsData =
-          response.dailyPredictions ||
-          response.predictions ||
-          [];
+      console.error(
+        "openScheduleDetail error:",
+        error
+      );
 
-
-        /*
-         * データ取得後に表示
-         */
-
-        renderFeaturedRiders(schedule.id);
-
-        renderDailyPredictions(schedule);
-
-
-      } catch (error) {
-
-        console.error(
-          "openScheduleDetail error:",
-          error
-        );
-
-
-        if (featuredList) {
-
-          featuredList.innerHTML =
-            '<div class="featured-empty">' +
-            '注目選手の情報を取得できませんでした。' +
-            '</div>';
-
-        }
-
-
-        if (predictionList) {
-
-          predictionList.innerHTML =
-            '<div class="prediction-empty">' +
-            '当日予想の情報を取得できませんでした。' +
-            '</div>';
-
-        }
-
-      } finally {
-
-        delete window[callbackName];
-
-        if (
-          script &&
-          script.parentNode
-        ) {
-
-          script.parentNode.removeChild(script);
-
-        }
-
-      }
-
-    };
-
-
-  /*
-   * ========================================
-   * GASへ通常モードでアクセス
-   * ========================================
-   */
-
-  const script =
-    document.createElement("script");
-
-
-  script.src =
-  GAS_API_URL +
-  "?mode=detail&callback=" +
-  encodeURIComponent(callbackName);
-
-
-  script.onerror =
-    function() {
 
       if (featuredList) {
 
@@ -3325,22 +3241,60 @@ function openSchedule() {
 
       }
 
+    }
 
-      delete window[callbackName];
+  }
 
-      if (script.parentNode) {
 
-        script.parentNode.removeChild(script);
+  /*
+   * ========================================
+   * すでに共通データ取得済み
+   * ========================================
+   */
 
-      }
+  if (window.appDataReady === true) {
+
+    showScheduleDetail();
+
+    window.scrollTo(0, 0);
+
+    return;
+
+  }
+
+
+  /*
+   * ========================================
+   * まだ取得中なら完了を待つ
+   * ========================================
+   */
+
+  const handleAppDataReady =
+    function() {
+
+      showScheduleDetail();
+
+      window.scrollTo(0, 0);
 
     };
 
 
-  document.body.appendChild(script);
+  window.addEventListener(
+    "appDataReady",
+    handleAppDataReady,
+    {
+      once: true
+    }
+  );
 
 
-  window.scrollTo(0, 0);
+  /*
+   * ========================================
+   * 共通データ取得開始
+   * ========================================
+   */
+
+  loadAppData();
 
 }
 
