@@ -3877,6 +3877,9 @@ document.addEventListener("click", function(event) {
 
   gtag('event', 'today_start_list_click');
 
+gtag('event', 'start_list_click', {
+  source: window.predictionEntrySource || 'unknown'
+});
 });
 
     function renderPredictionDetail(schedule, targetDate, selectedRaceNumber) {
