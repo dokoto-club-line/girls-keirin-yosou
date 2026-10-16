@@ -3132,12 +3132,16 @@ function openSchedule() {
    * ========================================
    */
 
-  document.querySelector(".app").style.display = "none";
+ document.querySelector(".app").style.display = "none";
 
-  document.getElementById("schedulePage").classList.remove("active");
+document.getElementById("schedulePage")
+  .classList.remove("active");
 
-  document.getElementById("detailPage").classList.add("active");
+document.getElementById("detailPage")
+  .classList.add("active");
 
+document.querySelector(".detail-content")
+  .style.display = "";
 
   document.getElementById("detailHeaderTitle").textContent =
     schedule.venueText;
@@ -4325,15 +4329,35 @@ function openCurrent() {
         );
 
 
-      if (!currentSchedule) {
+   if (!currentSchedule) {
 
-        alert(
-          "現在開催中の開催はありません。"
-        );
+  // 現在開催中の情報がなくても
+  // ポップアップは表示せず、現在開催中の画面を開く
 
-        return;
-      }
+  document.querySelector(".app").style.display = "none";
 
+  document.getElementById("schedulePage")
+    .classList.remove("active");
+
+  document.getElementById("detailPage")
+    .classList.add("active");
+
+  // 詳細ページのタイトル
+  document.getElementById("detailHeaderTitle")
+    .textContent = "現在開催中";
+
+  // 現在開催中の情報がないことを表示
+  document.getElementById("detailHeaderPeriod")
+    .textContent = "現在開催中の開催はありません。";
+
+  // 注目選手・当日予想一覧は表示しない
+  document.querySelector(".detail-content")
+    .style.display = "none";
+
+  window.scrollTo(0, 0);
+
+  return;
+}
 
       document
         .querySelector(".app")
