@@ -204,6 +204,16 @@
       top: 71px;
     }
 
+/* 自転車アイコン（現在開催中の情報） */
+.bike-icon {
+  background: #fff2f7;
+  color: #d82c78;
+}
+
+.bike-icon svg {
+  width: 76px;
+  height: 76px;
+}
 
     /* ========================================
        王冠
@@ -2219,14 +2229,25 @@
   onclick="gtag('event', 'current_click'); openCurrent()"
 >
 
-        <div class="menu-icon calendar-icon">
-
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-
-        </div>
+        <div class="menu-icon bike-icon">
+  <svg viewBox="0 0 100 80"
+       xmlns="http://www.w3.org/2000/svg"
+       aria-hidden="true">
+    <g fill="none"
+       stroke="currentColor"
+       stroke-width="4"
+       stroke-linecap="round"
+       stroke-linejoin="round">
+      <circle cx="23" cy="55" r="17"/>
+      <circle cx="77" cy="55" r="17"/>
+      <path d="M23 55 L38 31 L54 55 L23 55"/>
+      <path d="M54 55 L65 30 L77 55"/>
+      <path d="M34 31 H45"/>
+      <path d="M60 30 H70"/>
+      <path d="M65 30 L72 23"/>
+    </g>
+  </svg>
+</div>
 
 
         <div class="menu-text">
