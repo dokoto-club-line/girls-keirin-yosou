@@ -2141,6 +2141,27 @@
   }
 
 }    
+
+/* 注目選手見出しとキャラクター */
+.featured-heading {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.featured-heading .detail-section-title {
+  margin: 0;
+}
+
+.featured-heading-character {
+  display: block;
+  width: 68px;
+  height: 78px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
     
 </style>
 
@@ -2413,9 +2434,19 @@
 
       <section>
 
-        <h2 class="detail-section-title">
-          ★ 今開催のDOKOりん注目選手
-        </h2>
+        <div class="featured-heading">
+
+  <h2 class="detail-section-title">
+    ★ 今開催のDOKOりん注目選手
+  </h2>
+
+  <img
+    src="dokorin.png"
+    alt="DOKOりん"
+    class="featured-heading-character"
+  >
+
+</div>
 
         <div class="featured-box">
 
