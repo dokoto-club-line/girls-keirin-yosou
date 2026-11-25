@@ -3288,11 +3288,13 @@ function openSchedule() {
 
 
           const weekdayText =
-            "(" +
-            escapeHtml(item.startWeekday) +
-            ")～(" +
-            escapeHtml(item.endWeekday) +
-            ")";
+  item.startWeekday === item.endWeekday
+    ? "(" + escapeHtml(item.startWeekday) + ")"
+    : "(" +
+      escapeHtml(item.startWeekday) +
+      ")～(" +
+      escapeHtml(item.endWeekday) +
+      ")";
 
 
           return (
