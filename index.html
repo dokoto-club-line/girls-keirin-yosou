@@ -3280,9 +3280,11 @@ function openSchedule() {
         schedules.map(function(item) {
 
           const dateText =
-            escapeHtml(item.startText) +
-            "～" +
-            escapeHtml(item.endText);
+  item.startText === item.endText
+    ? escapeHtml(item.startText)
+    : escapeHtml(item.startText) +
+      "～" +
+      escapeHtml(item.endText);
 
 
           const weekdayText =
